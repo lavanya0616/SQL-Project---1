@@ -189,3 +189,70 @@ VALUES
 (19, 19, 19, '2024-04-02 16:00:00', 70, 'Laptop', 'Thoothukudi'),
 (20, 20, 20, '2024-04-03 19:00:00', 85, 'Tablet', 'Chennai');
 select * from Watch_History;
+
+
+-- QUERIES--
+
+
+SELECT * FROM Users
+WHERE Subscription_plan = 'Premium';
+
+SELECT * FROM Movies
+WHERE Genre_id = (SELECT Genre_id FROM Genres WHERE Genre_name = 'Action');
+
+SELECT Users.First_name, Users.Last_name, Watch_History.Start_time, Watch_History.Progress_percentage
+FROM Watch_History
+JOIN Users ON Watch_History.User_id = Users.User_id
+WHERE Watch_History.Movie_id = 1;  -- Movie 'Vikram' has Movie_id 1
+
+SELECT Users.First_name, Users.Last_name, SUM(Payment_table.Amount) AS Total_Payment
+FROM Payment_table
+JOIN Users ON Payment_table.User_id = Users.User_id
+GROUP BY Users.User_id;
+
+SELECT DATE(Start_time) AS Watch_Date,
+SUM(Duration * (Progress_percentage / 100)) AS Total_Watch_Time_Minutes
+FROM Watch_History 
+JOIN Movies ON Watch_History.Movie_id = Movies.Movie_id
+GROUP BY DATE(Start_time)
+ORDER BY Watch_Date;
+
+SELECT g.Genre_name, 
+COUNT(m.Movie_id) AS Movie_Count
+FROM Genres g
+JOIN Movies m ON g.Genre_id = m.Genre_id
+GROUP BY g.Genre_name
+ORDER BY Movie_Count DESC;
+
+SELECT Title,Duration 
+FROM Movies
+WHERE Duration >= 120 
+ORDER BY Duration DESC;
+
+SELECT u.User_id,u.First_name,u.Last_name,
+SUM(p.Amount) AS Total_Spent
+FROM Users u
+JOIN Payment_table p ON u.User_id = p.User_id
+GROUP BY u.User_id
+ORDER BY Total_Spent DESC
+LIMIT 5;
+
+CREATE VIEW User_Activity_Summary AS
+SELECT 
+    u.User_id,
+    u.First_name,
+    u.Last_name,
+    COUNT(DISTINCT w.Movie_id) AS Total_Movies_Watched,
+    SUM(p.Amount) AS Total_Amount_Spent
+FROM Users u
+LEFT JOIN Watch_History w ON u.User_id = w.User_id
+LEFT JOIN Payment_table p ON u.User_id = p.User_id
+GROUP BY u.User_id;
+
+SELECT 
+    User_id,
+    First_name,
+    Last_name,
+    Total_Movies_Watched,
+    Total_Amount_Spent
+FROM User_Activity_Summary;
