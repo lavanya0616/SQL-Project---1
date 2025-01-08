@@ -256,3 +256,20 @@ SELECT
     Total_Movies_Watched,
     Total_Amount_Spent
 FROM User_Activity_Summary;
+
+DELIMITER $$
+CREATE PROCEDURE GetTotalAmountSpent(IN user_id INT)
+BEGIN
+    SELECT 
+        u.First_name,
+        u.Last_name,
+        SUM(p.Amount) AS Total_Spent
+    FROM Users u
+    JOIN Payment_table p ON u.User_id = p.User_id
+    WHERE u.User_id = user_id
+    GROUP BY u.User_id;
+END $$
+DELIMITER ;
+
+CALL GetTotalAmountSpent(1);
+
